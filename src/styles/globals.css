@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-nunito-sans: 'Nunito Sans', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-bg-primary text-on-surface-variant antialiased;
+    font-family: var(--font-nunito-sans);
+  }
+
+  /* Ensure minimum touch target size */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@layer components {
+  /* Tactile Button - Primary CTA with mechanical press effect */
+  .btn-tactile {
+    @apply relative inline-flex items-center justify-center px-8 py-3 rounded-full;
+    @apply bg-accent-primary text-white font-bold text-base;
+    @apply transition-all duration-150 ease-out;
+    @apply cursor-pointer select-none;
+    box-shadow: 0 4px 0 0 #059669;
+    transform: translateY(0);
+  }
+
+  .btn-tactile:hover {
+    @apply bg-accent-primary brightness-110;
+  }
+
+  .btn-tactile:active {
+    box-shadow: 0 0px 0 0 #059669;
+    transform: translateY(4px);
+  }
+
+  .btn-tactile:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    box-shadow: 0 2px 0 0 #059669;
+  }
+
+  /* Glass Effect Panel - Elevated containers with backdrop blur */
+  .glass-panel {
+    @apply bg-white/90 backdrop-blur-glass;
+    @apply border border-outline/30 rounded-xl;
+    @apply shadow-lg;
+  }
+
+  /* Bento Grid Layout - Dashboard card system */
+  .bento-grid {
+    @apply grid gap-4;
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .bento-card {
+    @apply bg-white rounded-xl p-6;
+    @apply border border-outline/30;
+    @apply transition-all duration-200 shadow-sm;
+  }
+
+  .bento-card:hover {
+    @apply border-accent-primary/40 shadow-md;
+  }
+
+  .bento-card-wide {
+    @apply md:col-span-2;
+  }
+
+  .bento-card-tall {
+    @apply md:row-span-2;
+  }
+
+  /* Freshness Badge - Time-based status indicators */
+  .badge-fresh {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full;
+    @apply bg-fresh-mint text-white text-xs font-bold;
+    @apply animate-pulse-slow;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full;
+    @apply bg-warning-mint text-white text-xs font-bold;
+  }
+
+  .badge-critical {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full;
+    @apply bg-critical-red text-white text-xs font-bold;
+  }
+
+  /* Input Field - Form inputs with consistent styling */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply bg-white border border-outline/30;
+    @apply text-on-surface-variant placeholder:text-outline;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent;
+    @apply transition-all duration-200;
+  }
+
+  .input-field:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* Progress Bar - Dynamic pricing visualization */
+  .progress-bar {
+    @apply relative w-full h-2 bg-surface-container rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply absolute left-0 top-0 h-full bg-accent-primary rounded-full;
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Card Horizontal - Marketplace product layout */
+  .card-horizontal {
+    @apply flex gap-4 p-4 rounded-xl;
+    @apply bg-white border border-outline/30;
+    @apply transition-all duration-200 shadow-sm;
+  }
+
+  .card-horizontal:hover {
+    @apply border-accent-primary/40 shadow-md;
+  }
+
+  /* Stepper - Multi-step flow indicator */
+  .stepper {
+    @apply flex items-center justify-between mb-8;
+  }
+
+  .stepper-step {
+    @apply flex items-center gap-2;
+  }
+
+  .stepper-circle {
+    @apply w-10 h-10 rounded-full flex items-center justify-center;
+    @apply border-2 border-outline text-outline font-bold;
+    @apply transition-all duration-200;
+  }
+
+  .stepper-circle.active {
+    @apply border-accent-primary bg-accent-primary text-white;
+  }
+
+  .stepper-circle.completed {
+    @apply border-accent-primary bg-accent-primary text-white;
+  }
+
+  /* Upload Zone - Drag and drop area */
+  .upload-zone {
+    @apply border-2 border-dashed border-outline/50 rounded-xl;
+    @apply p-8 text-center cursor-pointer bg-surface-container;
+    @apply transition-all duration-200;
+  }
+
+  .upload-zone:hover {
+    @apply border-accent-primary/60 bg-surface-container-high;
+  }
+
+  .upload-zone.dragging {
+    @apply border-accent-primary bg-accent-primary/10;
+  }
+}
+
+@layer utilities {
+  /* Accessibility - Focus visible for keyboard navigation */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary;
+  }
+
+  /* Safe Area - Respect device notches and gesture bars */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Text Truncation */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Scrollbar Styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-surface-container;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-outline rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent-primary;
+  }
+}
+
+/* Animations */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  /* Already dark by default, but ensure consistency */
+  body {
+    @apply bg-bg-primary;
+  }
+}
