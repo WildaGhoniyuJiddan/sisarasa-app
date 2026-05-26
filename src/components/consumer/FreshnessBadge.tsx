@@ -1,4 +1,5 @@
 import { getHoursSince, getFreshnessStatus } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 interface FreshnessBadgeProps {
   cookedAt: string | Date
@@ -12,17 +13,17 @@ export default function FreshnessBadge({ cookedAt, className = '' }: FreshnessBa
   const badgeConfig = {
     fresh: {
       label: 'NEW',
-      className: 'badge-fresh',
+      variant: 'success' as const,
       description: 'Baru dimasak',
     },
     warning: {
       label: `${hoursSince}H AGO`,
-      className: 'badge-warning',
+      variant: 'warning' as const,
       description: 'Masih segar',
     },
     critical: {
       label: 'LAST CALL',
-      className: 'badge-critical',
+      variant: 'destructive' as const,
       description: 'Segera habis',
     },
   }
@@ -30,12 +31,13 @@ export default function FreshnessBadge({ cookedAt, className = '' }: FreshnessBa
   const config = badgeConfig[status]
 
   return (
-    <span
-      className={`${config.className} ${className}`}
+    <Badge
+      variant={config.variant}
+      className={`rounded-full font-extrabold text-[10px] tracking-wider px-2 py-0.5 shadow-sm ${className}`}
       title={`${config.description} - ${hoursSince} jam yang lalu`}
       aria-label={`${config.description}, dimasak ${hoursSince} jam yang lalu`}
     >
       {config.label}
-    </span>
+    </Badge>
   )
 }

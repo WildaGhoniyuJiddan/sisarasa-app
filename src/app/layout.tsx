@@ -45,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={nunitoSans.variable}>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased bg-white">
         <AuthProvider>
           {children}
         </AuthProvider>

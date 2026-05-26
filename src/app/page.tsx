@@ -1,218 +1,364 @@
-import Link from 'next/link'
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  Sparkles,
+  MapPin,
+  Clock,
+  ArrowRight,
+  TrendingDown,
+  ShieldCheck,
+  HeartHandshake
+} from "lucide-react"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#031800] text-[#bfcab8] relative overflow-hidden font-sans selection:bg-[#7cdc70]/30 selection:text-white">
+      
+      {/* Background Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a3200_1px,transparent_1px),linear-gradient(to_bottom,#0a3200_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none -z-20" />
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#031800]/80 backdrop-blur-md border-b border-[#7cdc70]/10 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-accent-primary flex items-center justify-center">
-                <span className="text-white font-black text-xl">S</span>
-              </div>
-              <span className="text-2xl font-black text-gray-900">SisaRasa</span>
+              <Link href="/" className="relative h-10 w-36 block">
+                <Image
+                  src="/images/logo.png"
+                  alt="SisaRasa Logo"
+                  fill
+                  sizes="144px"
+                  priority
+                  className="object-contain"
+                />
+              </Link>
             </div>
 
             {/* Menu */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-gray-900 font-semibold hover:text-accent-primary transition-colors">
+              <Link
+                href="/"
+                className="text-white font-bold hover:text-[#7cdc70] transition-colors duration-200"
+              >
                 Home
               </Link>
-              <Link href="#about" className="text-gray-600 hover:text-accent-primary transition-colors">
+              <Link
+                href="#about"
+                className="text-[#bfcab8] hover:text-[#7cdc70] transition-colors duration-200"
+              >
                 Tentang Kami
               </Link>
-              <Link href="#features" className="text-gray-600 hover:text-accent-primary transition-colors">
+              <Link
+                href="#features"
+                className="text-[#bfcab8] hover:text-[#7cdc70] transition-colors duration-200"
+              >
                 Fitur
               </Link>
-              <Link href="#impact" className="text-gray-600 hover:text-accent-primary transition-colors">
+              <Link
+                href="#impact"
+                className="text-[#bfcab8] hover:text-[#7cdc70] transition-colors duration-200"
+              >
                 Dampak
               </Link>
             </div>
 
             {/* CTA Button */}
-            <Link
-              href="/login"
-              className="px-6 py-3 bg-accent-primary text-white font-bold rounded-full hover:brightness-110 transition-all"
-            >
-              Mulai Sekarang
+            <Link href="/login" passHref>
+              <Button variant="brand" className="font-extrabold">
+                Mulai Sekarang
+              </Button>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Text with Circle */}
-            <div className="relative">
-              {/* Large Green Circle */}
-              <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-primary rounded-full -z-10 opacity-90" />
+      <section className="relative pt-32 pb-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            
+            {/* Left Side - Text with Gradient & CTA */}
+            <div className="relative flex flex-col items-start text-left">
+              {/* Floating AI Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0a3200]/90 border border-[#7cdc70]/30 text-[#7cdc70] text-xs font-semibold mb-8 uppercase tracking-widest animate-pulse">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI-Powered Food Restoration</span>
+              </div>
 
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-3 mb-6">
-                  <h1 className="text-7xl lg:text-8xl font-black text-gray-900 leading-none">
-                    Sisa
-                    <br />
-                    Rasa
-                  </h1>
-                  <div className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center">
-                    <span className="text-3xl">🍽️</span>
-                  </div>
+              {/* Headline */}
+              <h1 className="text-6xl lg:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-6">
+                Sisa
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#7cdc70] to-[#7CFFCB]">
+                  Rasa
+                </span>
+              </h1>
+
+              {/* Sub-text */}
+              <p className="text-lg lg:text-xl text-[#bfcab8]/90 mb-10 max-w-lg leading-relaxed">
+                Platform kecerdasan buatan revolusioner yang mengoptimalkan surplus makanan, menghentikan food waste, dan menghubungkan UMKM dengan aksi sosial berkelanjutan.
+              </p>
+
+              {/* CTA Action */}
+              <Link href="/login" passHref>
+                <Button variant="dark" size="lg" className="group flex items-center gap-2.5 font-bold">
+                  <span>Jelajahi Platform</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Right Side - Premium Overlapping Cards with Glow Orbs */}
+            <div className="relative h-[600px] w-full flex items-center justify-center lg:block">
+              {/* Blurred Glow Orbs */}
+              <div className="absolute top-1/4 left-1/4 w-[320px] h-[320px] rounded-full bg-[#7cdc70]/10 blur-[100px] -z-10 animate-pulse-slow" />
+              <div className="absolute bottom-1/4 right-1/4 w-[280px] h-[280px] rounded-full bg-[#10b981]/15 blur-[120px] -z-10" />
+
+              {/* Staggered Card 1: Top-Left Card */}
+              <Card className="absolute top-4 left-4 w-[280px] lg:w-[310px] rotate-[-4deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 bg-[#062600]/80">
+                <div className="relative h-40 w-full overflow-hidden rounded-t-xl">
+                  <Image
+                    src="/images/sayur.jpg"
+                    alt="Surplus Makanan Terbantu"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 310px"
+                    className="object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  <Badge variant="success" className="absolute top-3 right-3 font-extrabold shadow-md">
+                    NEW / <Clock className="w-3 h-3 inline mr-0.5" /> 2 Jam
+                  </Badge>
                 </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-1 text-[10px] font-black text-[#7cdc70] mb-1.5 tracking-wider uppercase">
+                    <Sparkles className="w-3 h-3" />
+                    <span>AI Surplus Predictor</span>
+                  </div>
+                  <h4 className="text-sm font-black text-white mb-2 line-clamp-1">Surplus Sayuran Organik</h4>
+                  <div className="flex items-center text-xs text-[#bfcab8]/80 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 mr-1 shrink-0" />
+                    <span className="truncate">Warung Bu Totok (1.2 km)</span>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <p className="text-xl text-gray-600 mb-8 max-w-md">
-                  Platform AI yang Mengubah Surplus Makanan Menjadi Solusi Berkelanjutan
-                </p>
+              {/* Staggered Card 2: Center Card */}
+              <Card className="absolute top-[32%] right-4 w-[290px] lg:w-[320px] rotate-[3deg] border-[#7cdc70]/30 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/50 transition-all duration-300 z-10 bg-[#0A3200]/90">
+                <div className="relative h-44 w-full overflow-hidden rounded-t-xl">
+                  <Image
+                    src="/images/sayur2.jpg"
+                    alt="Penyelamatan Pangan"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 320px"
+                    className="object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  <Badge variant="warning" className="absolute top-3 right-3 font-extrabold shadow-md">
+                    <Clock className="w-3 h-3 inline mr-0.5" /> 5 Jam
+                  </Badge>
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <span className="text-[9px] bg-[#7cdc70]/20 text-[#7cdc70] border border-[#7cdc70]/30 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                        Dynamic Price
+                      </span>
+                      <h4 className="text-sm font-black text-white mt-1.5 line-clamp-1">Sayur Masak Segar</h4>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] line-through text-[#bfcab8]/40 block">Rp 24k</span>
+                      <span className="text-sm font-black text-[#7cdc70]">Rp 12k</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-xs text-[#bfcab8]/80 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 mr-1 shrink-0" />
+                    <span className="truncate">Soto Segar Berkah (800m)</span>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Link
-                  href="/login"
-                  className="inline-block px-8 py-4 bg-gray-900 text-white font-bold rounded-full hover:bg-gray-800 transition-all"
-                >
-                  Jelajahi Platform
-                </Link>
-              </div>
-
-              {/* Indonesian Text Vertical */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 text-accent-primary/20 font-black text-6xl writing-mode-vertical hidden lg:block">
-                食品
-              </div>
+              {/* Staggered Card 3: Bottom Card */}
+              <Card className="absolute bottom-4 left-12 w-[270px] lg:w-[300px] rotate-[-2deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 z-20 bg-[#062600]/80">
+                <div className="relative h-36 w-full overflow-hidden rounded-t-xl">
+                  <Image
+                    src="/images/sayur3.jpg"
+                    alt="Donasi Terverifikasi"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 300px"
+                    className="object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  <Badge variant="default" className="absolute top-3 right-3 bg-emerald-600 border-none text-white font-extrabold shadow-md">
+                    DONASI SOSIAL
+                  </Badge>
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-[#7CFFCB] animate-pulse" />
+                    <span className="text-xs font-black text-white">Diklaim Panti Asuhan Kasih</span>
+                  </div>
+                  <div className="flex items-center text-xs text-[#bfcab8]/80 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 mr-1 shrink-0" />
+                    <span className="truncate">2.4 km dari lokasi Anda</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Right Side - Food Images */}
-            <div className="relative h-[600px] hidden lg:block">
-              {/* Food Image 1 */}
-              <div className="absolute top-0 right-0 w-64 h-48 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 rounded-3xl shadow-xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
-                <span className="text-8xl">🍛</span>
-              </div>
-
-              {/* Food Image 2 */}
-              <div className="absolute top-1/3 right-20 w-72 h-56 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 rounded-3xl shadow-xl flex items-center justify-center transform -rotate-2 hover:rotate-0 transition-transform">
-                <span className="text-9xl">🍜</span>
-              </div>
-
-              {/* Food Image 3 */}
-              <div className="absolute bottom-0 right-10 w-64 h-48 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 rounded-3xl shadow-xl flex items-center justify-center transform rotate-2 hover:rotate-0 transition-transform">
-                <span className="text-8xl">🍲</span>
-              </div>
-
-              {/* Decorative Elements */}
-              <div className="absolute top-1/4 left-0 w-3 h-3 bg-accent-primary rounded-full animate-pulse" />
-              <div className="absolute bottom-1/4 right-0 w-2 h-2 bg-warning-mint rounded-full animate-pulse delay-100" />
-            </div>
           </div>
         </div>
       </section>
 
       {/* Why SisaRasa Section */}
-      <section id="features" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <h2 className="text-5xl font-black text-center text-gray-900 mb-16">
-            Mengapa SisaRasa?
-          </h2>
+      <section id="features" className="py-24 bg-[#062600]/40 border-y border-[#7cdc70]/10 relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-[#7cdc70] text-xs font-extrabold uppercase tracking-widest">
+              Keunggulan Utama
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black text-white mt-3 tracking-tight">
+              Mengapa SisaRasa?
+            </h2>
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="text-center">
-              <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gradient-to-br from-accent-primary to-accent-secondary shadow-xl flex items-center justify-center">
-                <span className="text-7xl">🤖</span>
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-3">
-                Prediksi AI Cerdas
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Teknologi AI memprediksi surplus makanan sebelum terjadi, membantu warung UMKM mengoptimalkan produksi dan mengurangi limbah.
-              </p>
-            </div>
+            <Card className="bg-[#062600]/80 border-[#7cdc70]/10 hover:border-[#7cdc70]/30 transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-8 text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#7cdc70]/10 border border-[#7cdc70]/20 flex items-center justify-center mb-6">
+                  <Sparkles className="w-8 h-8 text-[#7cdc70]" />
+                </div>
+                <h3 className="text-xl font-black text-white mb-3">
+                  Prediksi AI Cerdas
+                </h3>
+                <p className="text-sm text-[#bfcab8]/80 leading-relaxed">
+                  Teknologi AI memprediksi surplus makanan sebelum terjadi, membantu warung UMKM mengoptimalkan produksi dan mengurangi limbah.
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Feature 2 */}
-            <div className="text-center">
-              <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gradient-to-br from-warning-mint to-yellow-400 shadow-xl flex items-center justify-center">
-                <span className="text-7xl">💰</span>
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-3">
-                Harga Dinamis Otomatis
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Sistem harga dinamis otomatis memberikan diskon hingga 50% untuk makanan surplus, memastikan nilai ekonomi tetap terselamatkan.
-              </p>
-            </div>
+            <Card className="bg-[#062600]/80 border-[#7cdc70]/10 hover:border-[#7cdc70]/30 transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-8 text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#7cdc70]/10 border border-[#7cdc70]/20 flex items-center justify-center mb-6">
+                  <TrendingDown className="w-8 h-8 text-[#7cdc70]" />
+                </div>
+                <h3 className="text-xl font-black text-white mb-3">
+                  Harga Dinamis Otomatis
+                </h3>
+                <p className="text-sm text-[#bfcab8]/80 leading-relaxed">
+                  Sistem harga dinamis otomatis memberikan diskon hingga 50% untuk makanan surplus, memastikan nilai ekonomi tetap terselamatkan.
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Feature 3 */}
-            <div className="text-center">
-              <div className="w-48 h-48 mx-auto mb-6 rounded-full bg-gradient-to-br from-fresh-mint to-accent-secondary shadow-xl flex items-center justify-center">
-                <span className="text-7xl">🤝</span>
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-3">
-                Donasi Transparan
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Platform donasi makanan yang aman dan akuntabel dengan sistem verifikasi identitas dan bukti penyerahan untuk mencegah fraud.
-              </p>
-            </div>
+            <Card className="bg-[#062600]/80 border-[#7cdc70]/10 hover:border-[#7cdc70]/30 transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-8 text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#7cdc70]/10 border border-[#7cdc70]/20 flex items-center justify-center mb-6">
+                  <HeartHandshake className="w-8 h-8 text-[#7cdc70]" />
+                </div>
+                <h3 className="text-xl font-black text-white mb-3">
+                  Donasi Transparan
+                </h3>
+                <p className="text-sm text-[#bfcab8]/80 leading-relaxed">
+                  Platform donasi makanan yang aman dan akuntabel dengan sistem verifikasi identitas dan bukti penyerahan untuk mencegah fraud.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-6xl font-black text-accent-primary mb-2">48M</div>
-              <div className="text-gray-600 font-semibold">Ton Limbah Makanan/Tahun di Indonesia</div>
+      <section id="impact" className="py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+          <div className="grid md:grid-cols-3 gap-12 text-center items-center">
+            
+            <div className="p-6 bg-[#062600]/30 rounded-2xl border border-[#7cdc70]/5">
+              <div className="text-5xl lg:text-6xl font-black text-white mb-3 tracking-tighter bg-gradient-to-r from-[#7cdc70] to-[#7CFFCB] bg-clip-text text-transparent">
+                48 Juta
+              </div>
+              <div className="text-xs text-[#bfcab8]/70 uppercase font-black tracking-widest mb-1">
+                Limbah Pangan / Tahun
+              </div>
+              <p className="text-sm text-[#bfcab8]/90">Kerugian limbah pangan tahunan di Indonesia</p>
             </div>
-            <div>
-              <div className="text-6xl font-black text-accent-primary mb-2">50%</div>
-              <div className="text-gray-600 font-semibold">Diskon Maksimal untuk Surplus</div>
+
+            <div className="p-6 bg-[#062600]/30 rounded-2xl border border-[#7cdc70]/5">
+              <div className="text-5xl lg:text-6xl font-black text-white mb-3 tracking-tighter bg-gradient-to-r from-[#7cdc70] to-[#7CFFCB] bg-clip-text text-transparent">
+                Diskon 50%
+              </div>
+              <div className="text-xs text-[#bfcab8]/70 uppercase font-black tracking-widest mb-1">
+                Maksimal Penyelamatan
+              </div>
+              <p className="text-sm text-[#bfcab8]/90">Proteksi HPP tetap aman bagi warung UMKM</p>
             </div>
-            <div>
-              <div className="text-6xl font-black text-accent-primary mb-2">100%</div>
-              <div className="text-gray-600 font-semibold">Berbasis Kecerdasan Buatan</div>
+
+            <div className="p-6 bg-[#062600]/30 rounded-2xl border border-[#7cdc70]/5">
+              <div className="text-5xl lg:text-6xl font-black text-white mb-3 tracking-tighter bg-gradient-to-r from-[#7cdc70] to-[#7CFFCB] bg-clip-text text-transparent">
+                100% Real-time
+              </div>
+              <div className="text-xs text-[#bfcab8]/70 uppercase font-black tracking-widest mb-1">
+                Integrasi Ekosistem
+              </div>
+              <p className="text-sm text-[#bfcab8]/90">Berbasis AI Vision & Dynamic Pricing</p>
             </div>
+
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-accent-primary to-accent-secondary">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-5xl font-black text-white mb-6">
+      <section className="py-24 relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0A3200] via-[#031800] to-[#031800] border-t border-[#7cdc70]/10">
+        
+        {/* Glow behind CTA */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[#7cdc70]/5 blur-[120px] -z-10" />
+
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7cdc70]/10 border border-[#7cdc70]/20 text-[#7cdc70] text-xs font-semibold mb-6">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Verifikasi & Aman Terpercaya</span>
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-6 tracking-tight">
             Siap Mengurangi Limbah Makanan?
           </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Bergabunglah dengan ribuan warung UMKM dan konsumen yang telah menyelamatkan makanan bersama SisaRasa
+          <p className="text-lg text-[#bfcab8]/90 mb-10 max-w-xl mx-auto">
+            Bergabunglah dengan ribuan warung UMKM dan konsumen yang menyelamatkan pangan, melestarikan alam, dan membantu sesama bersama SisaRasa.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
-              className="px-8 py-4 bg-white text-accent-primary font-bold rounded-full hover:bg-gray-100 transition-all"
-            >
-              Daftar Sebagai Penjual
+            <Link href="/login" passHref>
+              <Button variant="brand" size="lg" className="w-full sm:w-auto font-black shadow-lg">
+                Daftar Sebagai Penjual
+              </Button>
             </Link>
-            <Link
-              href="/login"
-              className="px-8 py-4 bg-gray-900 text-white font-bold rounded-full hover:bg-gray-800 transition-all"
-            >
-              Daftar Sebagai Konsumen
+            <Link href="/login" passHref>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto hover:bg-[#163d07]/40 border-[#7cdc70]/30 hover:border-[#7cdc70] text-white">
+                Daftar Sebagai Konsumen
+              </Button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="py-16 bg-[#031800] border-t border-[#7cdc70]/10 relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-accent-primary flex items-center justify-center">
-                <span className="text-white font-black text-xl">S</span>
-              </div>
-              <span className="text-2xl font-black">SisaRasa</span>
+              <Link href="/" className="relative h-8 w-28 block">
+                <Image
+                  src="/images/logo.png"
+                  alt="SisaRasa Logo"
+                  fill
+                  sizes="112px"
+                  className="object-contain"
+                />
+              </Link>
             </div>
-            <p className="text-gray-400 text-sm">
+            
+            <p className="text-[#bfcab8]/60 text-sm text-center md:text-right">
               © 2026 SisaRasa. Menyelamatkan makanan, mengurangi limbah, membantu sesama.
             </p>
           </div>

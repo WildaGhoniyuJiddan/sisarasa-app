@@ -27,6 +27,19 @@ module.exports = {
         'fresh-mint': '#10B981',
         'warning-mint': '#F59E0B',
         'critical-red': '#EF4444',
+
+        // Shadcn UI Compatibility Tokens
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        primary: 'var(--primary)',
+        secondary: 'var(--secondary)',
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
       },
       fontFamily: {
         sans: ['var(--font-nunito-sans)', 'system-ui', 'sans-serif'],

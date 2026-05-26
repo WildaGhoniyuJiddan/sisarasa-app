@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import InputField from '@/components/ui/InputField'
-import GlassPanel from '@/components/ui/GlassPanel'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 
 export interface FilterOptions {
   searchQuery: string
@@ -58,39 +60,42 @@ export default function FilterBar({ filters, onFiltersChange }: FilterBarProps) 
     <div className="space-y-4">
       {/* Search Bar & Filter Toggle */}
       <div className="flex gap-3">
-        <div className="flex-1">
-          <InputField
+        <div className="flex-1 relative flex items-center">
+          <Search className="w-5 h-5 text-slate-400 absolute left-3.5 pointer-events-none" />
+          <Input
             type="search"
             placeholder="Cari makanan atau warung..."
             value={filters.searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            leftIcon={<Search size={20} />}
+            className="pl-11 h-12 bg-white border-slate-200 text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl"
             aria-label="Cari produk"
           />
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={() => setShowFilters(!showFilters)}
-          className="relative px-4 py-3 rounded-xl bg-surface-container border border-outline/30 hover:border-accent-primary/50 transition-all focus-visible-ring flex items-center gap-2"
+          className="relative h-12 w-12 rounded-xl border-slate-200 bg-white hover:bg-slate-50 hover:border-emerald-500/50 transition-all flex items-center justify-center shrink-0 shadow-sm"
           aria-label="Toggle filters"
           aria-expanded={showFilters}
         >
-          <SlidersHorizontal className="w-5 h-5 text-on-surface-variant" />
+          <SlidersHorizontal className="w-5 h-5 text-slate-600" />
           {activeFiltersCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent-primary text-bg-primary text-xs font-bold flex items-center justify-center">
+            <Badge className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center border-2 border-white p-0 shadow-sm">
               {activeFiltersCount}
-            </span>
+            </Badge>
           )}
-        </button>
+        </Button>
       </div>
 
-      {/* Filter Panel */}
+      {/* Filter Panel Card */}
       {showFilters && (
-        <GlassPanel className="space-y-6 animate-in slide-in-from-top-2 duration-200">
+        <Card className="p-6 space-y-6 border border-slate-100 bg-white/95 shadow-md rounded-2xl animate-in slide-in-from-top-2 duration-200">
           {/* Sort By */}
           <div>
-            <label className="block text-sm font-semibold text-on-surface-variant mb-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
               Urutkan Berdasarkan
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -98,20 +103,24 @@ export default function FilterBar({ filters, onFiltersChange }: FilterBarProps) 
                 { value: 'distance', label: 'Jarak' },
                 { value: 'price', label: 'Harga' },
                 { value: 'freshness', label: 'Kesegaran' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSortChange(option.value as FilterOptions['sortBy'])}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all focus-visible-ring ${
-                    filters.sortBy === option.value
-                      ? 'bg-accent-primary text-bg-primary'
-                      : 'bg-surface-container-high text-outline hover:text-accent-primary'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+              ].map((option) => {
+                const isActive = filters.sortBy === option.value
+                return (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant={isActive ? 'default' : 'outline'}
+                    onClick={() => handleSortChange(option.value as FilterOptions['sortBy'])}
+                    className={`h-10 rounded-xl text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/10'
+                        : 'border-slate-200 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50'
+                    }`}
+                  >
+                    {option.label}
+                  </Button>
+                )
+              })}
             </div>
           </div>
 
@@ -119,9 +128,9 @@ export default function FilterBar({ filters, onFiltersChange }: FilterBarProps) 
           <div>
             <label
               htmlFor="distance-slider"
-              className="block text-sm font-semibold text-on-surface-variant mb-3"
+              className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3"
             >
-              Jarak Maksimal: {(filters.maxDistance / 1000).toFixed(1)} km
+              Jarak Maksimal: <span className="text-emerald-600 font-extrabold">{(filters.maxDistance / 1000).toFixed(1)} km</span>
             </label>
             <input
               id="distance-slider"
@@ -131,9 +140,9 @@ export default function FilterBar({ filters, onFiltersChange }: FilterBarProps) 
               step="500"
               value={filters.maxDistance}
               onChange={(e) => handleDistanceChange(Number(e.target.value))}
-              className="w-full h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-accent-primary focus-visible-ring"
+              className="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
             />
-            <div className="flex justify-between text-xs text-outline mt-2">
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mt-2">
               <span>0.5 km</span>
               <span>5 km</span>
             </div>
@@ -141,53 +150,56 @@ export default function FilterBar({ filters, onFiltersChange }: FilterBarProps) 
 
           {/* Freshness Filter */}
           <div>
-            <label className="block text-sm font-semibold text-on-surface-variant mb-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
               Filter Kesegaran
             </label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { value: 'all', label: 'Semua', color: 'bg-surface-container-high' },
-                { value: 'fresh', label: 'Baru (< 4h)', color: 'bg-fresh-mint/20 text-fresh-mint' },
-                { value: 'warning', label: 'Segar (4-8h)', color: 'bg-warning-mint/20 text-warning-mint' },
-                { value: 'critical', label: 'Last Call (> 8h)', color: 'bg-critical-red/20 text-critical-red' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() =>
-                    handleFreshnessChange(option.value as FilterOptions['freshnessFilter'])
-                  }
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold transition-all focus-visible-ring ${
-                    filters.freshnessFilter === option.value
-                      ? `${option.color} border-2 border-accent-primary`
-                      : `${option.color} border border-outline/20`
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+                { value: 'all', label: 'Semua', activeClass: 'border-slate-300 bg-slate-50 text-slate-700', inactiveClass: 'border-slate-200 text-slate-600 bg-white' },
+                { value: 'fresh', label: 'Baru (< 4h)', activeClass: 'border-emerald-300 bg-emerald-50/50 text-emerald-700', inactiveClass: 'border-slate-100 text-slate-500 bg-slate-50/30' },
+                { value: 'warning', label: 'Segar (4-8h)', activeClass: 'border-amber-300 bg-amber-50/50 text-amber-700', inactiveClass: 'border-slate-100 text-slate-500 bg-slate-50/30' },
+                { value: 'critical', label: 'Last Call (> 8h)', activeClass: 'border-red-300 bg-red-50/50 text-red-700', inactiveClass: 'border-slate-100 text-slate-500 bg-slate-50/30' },
+              ].map((option) => {
+                const isActive = filters.freshnessFilter === option.value
+                return (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      handleFreshnessChange(option.value as FilterOptions['freshnessFilter'])
+                    }
+                    className={`h-10 rounded-xl text-xs font-bold transition-all border ${
+                      isActive ? `${option.activeClass} border-2` : `${option.inactiveClass} hover:bg-slate-50`
+                    }`}
+                  >
+                    {option.label}
+                  </Button>
+                )
+              })}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-outline/20">
-            <button
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <Button
               type="button"
+              variant="outline"
               onClick={resetFilters}
-              className="flex-1 px-4 py-3 rounded-xl border border-outline/30 text-sm font-semibold text-outline hover:text-accent-primary hover:border-accent-primary/50 transition-all focus-visible-ring flex items-center justify-center gap-2"
+              className="flex-1 h-11 rounded-xl border-slate-200 text-xs font-bold text-slate-500 hover:text-[#FF4D4D] hover:bg-red-50/50 hover:border-red-200 transition-all flex items-center justify-center gap-2"
             >
               <X className="w-4 h-4" />
               <span>Reset Filter</span>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setShowFilters(false)}
-              className="flex-1 px-4 py-3 rounded-xl bg-accent-primary text-bg-primary text-sm font-semibold hover:brightness-110 transition-all focus-visible-ring"
+              className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs tracking-wider uppercase shadow-md shadow-emerald-500/10"
             >
               Terapkan
-            </button>
+            </Button>
           </div>
-        </GlassPanel>
+        </Card>
       )}
     </div>
   )
