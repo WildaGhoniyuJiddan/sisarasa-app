@@ -33,7 +33,7 @@ export default function HomePage() {
                   fill
                   sizes="144px"
                   priority
-                  className="object-contain"
+                  className="object-contain object-left"
                 />
               </Link>
             </div>
@@ -112,13 +112,13 @@ export default function HomePage() {
             </div>
 
             {/* Right Side - Premium Overlapping Cards with Glow Orbs */}
-            <div className="relative h-[600px] w-full flex items-center justify-center lg:block">
+            <div className="relative h-auto lg:h-[600px] w-full flex flex-col md:flex-row lg:block gap-6 items-center justify-center mt-12 lg:mt-0">
               {/* Blurred Glow Orbs */}
-              <div className="absolute top-1/4 left-1/4 w-[320px] h-[320px] rounded-full bg-[#7cdc70]/10 blur-[100px] -z-10 animate-pulse-slow" />
-              <div className="absolute bottom-1/4 right-1/4 w-[280px] h-[280px] rounded-full bg-[#10b981]/15 blur-[120px] -z-10" />
+              <div className="absolute top-1/4 left-1/4 w-[320px] h-[320px] rounded-full bg-[#7cdc70]/10 blur-[100px] -z-10 animate-pulse-slow pointer-events-none" />
+              <div className="absolute bottom-1/4 right-1/4 w-[280px] h-[280px] rounded-full bg-[#10b981]/15 blur-[120px] -z-10 pointer-events-none" />
 
               {/* Staggered Card 1: Top-Left Card */}
-              <Card className="absolute top-4 left-4 w-[280px] lg:w-[310px] rotate-[-4deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 bg-[#062600]/80">
+              <Card className="relative w-full max-w-[340px] lg:absolute lg:top-4 lg:left-4 lg:w-[310px] lg:rotate-[-4deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 bg-[#062600]/80">
                 <div className="relative h-40 w-full overflow-hidden rounded-t-xl">
                   <Image
                     src="/images/sayur.jpg"
@@ -145,7 +145,7 @@ export default function HomePage() {
               </Card>
 
               {/* Staggered Card 2: Center Card */}
-              <Card className="absolute top-[32%] right-4 w-[290px] lg:w-[320px] rotate-[3deg] border-[#7cdc70]/30 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/50 transition-all duration-300 z-10 bg-[#0A3200]/90">
+              <Card className="relative w-full max-w-[340px] lg:absolute lg:top-[30%] lg:right-4 lg:w-[320px] lg:rotate-[3deg] border-[#7cdc70]/30 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/50 transition-all duration-300 z-10 bg-[#0A3200]/90">
                 <div className="relative h-44 w-full overflow-hidden rounded-t-xl">
                   <Image
                     src="/images/sayur2.jpg"
@@ -179,7 +179,7 @@ export default function HomePage() {
               </Card>
 
               {/* Staggered Card 3: Bottom Card */}
-              <Card className="absolute bottom-4 left-12 w-[270px] lg:w-[300px] rotate-[-2deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 z-20 bg-[#062600]/80">
+              <Card className="relative w-full max-w-[340px] lg:absolute lg:bottom-4 lg:left-12 lg:w-[300px] lg:rotate-[-2deg] border-[#7cdc70]/20 shadow-2xl hover:rotate-0 hover:scale-105 hover:z-30 hover:border-[#7cdc70]/40 transition-all duration-300 z-20 bg-[#062600]/80">
                 <div className="relative h-36 w-full overflow-hidden rounded-t-xl">
                   <Image
                     src="/images/sayur3.jpg"
@@ -353,7 +353,7 @@ export default function HomePage() {
                   alt="SisaRasa Logo"
                   fill
                   sizes="112px"
-                  className="object-contain"
+                  className="object-contain object-left"
                 />
               </Link>
             </div>
