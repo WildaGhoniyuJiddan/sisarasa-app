@@ -1,11 +1,12 @@
 'use client'
 
-import { Plus, Utensils, Edit3, Trash2, ShieldAlert, Sparkles } from 'lucide-react'
+import { Plus, Utensils, Edit3, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getHoursSince, getFreshnessStatus, formatCurrency } from '@/lib/utils'
 import { Product } from '@/types'
+import Image from 'next/image'
 
 interface ProductsViewProps {
   products: Product[]
@@ -23,7 +24,7 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
         </div>
         
         <Button
-          onClick={() => router.push('/seller/upload')}
+          onClick={() => router.push('/seller/scan')}
           className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold px-4 py-2.5 shadow-md shadow-emerald-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs md:text-sm"
         >
           <Plus className="w-4 h-4 shrink-0" />
@@ -38,17 +39,32 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
             const hoursSince = getHoursSince(product.cookedAt)
             const freshnessStatus = getFreshnessStatus(hoursSince)
             const isDonation = product.donationStatus === 'donation'
+            const isSoldOut = product.availablePortions === 0 || product.status === 'sold_out'
 
             return (
               <Card
                 key={product.id}
-                className="p-4 md:p-5 border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl"
+                className={`p-4 md:p-5 border bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl ${
+                  isSoldOut ? 'border-slate-200 opacity-70' : 'border-slate-100'
+                }`}
               >
                 {/* Product Info Row */}
                 <div className="flex items-start gap-4">
-                  {/* Left Side: Thumbnail placeholder */}
-                  <div className="w-16 h-16 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
-                    <Utensils className="w-7 h-7" />
+                  {/* Left Side: Product Image */}
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0 relative bg-emerald-50">
+                    {product.photoUrl ? (
+                      <Image
+                        src={product.photoUrl}
+                        alt={product.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-emerald-600">
+                        <Utensils className="w-7 h-7" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Middle Side: Details */}
@@ -57,9 +73,15 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
                       <h3 className="font-extrabold text-slate-800 text-sm md:text-base truncate tracking-tight">
                         {product.name}
                       </h3>
-                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[8px] md:text-[9px] px-2 py-0.5 tracking-wider shrink-0">
-                        AKTIF DIPASARKAN
-                      </Badge>
+                      {isSoldOut ? (
+                        <Badge variant="destructive" className="rounded-full font-bold text-[8px] md:text-[9px] px-2 py-0.5 tracking-wider shrink-0">
+                          HABIS TERJUAL
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[8px] md:text-[9px] px-2 py-0.5 tracking-wider shrink-0">
+                          AKTIF DIPASARKAN
+                        </Badge>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -76,7 +98,7 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
                         {hoursSince} jam yang lalu
                       </Badge>
                       <span className="text-[10px] md:text-xs font-bold text-slate-400">
-                        {product.availablePortions}/{product.totalPortions} Porsi sisa
+                        {product.availablePortions}/{product.totalPortions} porsi sisa
                       </span>
                     </div>
 
@@ -101,13 +123,8 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
                 </div>
 
                 {/* Quick Actions Row */}
-                <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                    <ShieldAlert className="w-3.5 h-3.5 text-slate-300" />
-                    <span>Perlu diawasi</span>
-                  </span>
-
-                  <div className="flex items-center gap-2">
+                {!isSoldOut && (
+                  <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -127,7 +144,7 @@ export default function ProductsView({ products, router }: ProductsViewProps) {
                       <span>Edit</span>
                     </Button>
                   </div>
-                </div>
+                )}
               </Card>
             )
           })}

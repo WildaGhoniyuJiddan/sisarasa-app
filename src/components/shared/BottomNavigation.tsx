@@ -26,7 +26,6 @@ export default function BottomNavigation({ activeTab, onTabChange, role }: Botto
   const sellerItems: NavigationItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'products', label: 'Produk', icon: Utensils },
-    { id: 'impact', label: 'Dampak', icon: BarChart3 },
     { id: 'account', label: 'Akun', icon: User },
   ]
 
@@ -34,7 +33,7 @@ export default function BottomNavigation({ activeTab, onTabChange, role }: Botto
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#899483]/10 shadow-lg px-2 py-1 pb-safe-bottom">
-      <div className="max-w-md mx-auto grid grid-cols-4 h-14 items-center">
+      <div className={cn("max-w-md mx-auto grid h-14 items-center", role === 'consumer' ? "grid-cols-4" : "grid-cols-3")}>
         {items.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id

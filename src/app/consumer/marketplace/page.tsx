@@ -3,12 +3,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { mockMarketplaceProducts } from '@/lib/mock-data'
-import { Product } from '@/types'
+// No mockMarketplaceProducts import - only real backend products used
+import { Product as FrontendProduct, DonationStatus, ProductStatus } from '@/types'
 import { getHoursSince, getFreshnessStatus } from '@/lib/utils'
-import { Sparkles, LogOut } from 'lucide-react'
+import { Sparkles, LogOut, RefreshCw } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+
+// Import API services
+import { getProducts, Product } from '@/services/api'
 
 // Import modular sub-views
 import BrowseView from '@/components/consumer/BrowseView'
@@ -23,6 +26,10 @@ export default function ConsumerMarketplacePage() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
 
   const [activeTab, setActiveTab] = useState<string>('browse')
+  const [backendProducts, setBackendProducts] = useState<FrontendProduct[]>([])
+  const [isFetching, setIsFetching] = useState<boolean>(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
   const [filters, setFilters] = useState<FilterOptions>({
     searchQuery: '',
     maxDistance: 5000,
@@ -38,9 +45,55 @@ export default function ConsumerMarketplacePage() {
     }
   }, [isAuthenticated, isLoading, user, router])
 
+  // Fetch real-time products from FastAPI backend
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      setIsFetching(false)
+      return
+    }
+
+    const fetchRealData = async () => {
+      try {
+        setIsFetching(true)
+        setFetchError(null)
+
+        const apiProducts = await getProducts()
+
+        // Map backend API data to frontend types (enriching mock portions)
+        const mapped: FrontendProduct[] = apiProducts.map((p: Product) => ({
+          id: p.id,
+          sellerId: p.sellerId,
+          sellerName: 'Warung Mitra SisaRasa', // Default display name
+          name: p.name,
+          description: 'Makanan surplus lezat, higienis, dan dikelola secara aman.',
+          photoUrl: p.photoUrl || '/images/sayur.jpg',
+          normalPrice: p.normalPrice,
+          currentPrice: p.currentPrice,
+          cookedAt: p.cookedAt,
+          totalPortions: p.portions || 1,
+          availablePortions: p.availablePortions !== undefined ? p.availablePortions : (p.portions || 1),
+          donationStatus: 'sale' as DonationStatus,
+          status: (p.status as ProductStatus) || 'active',
+          // Generasikan jarak acak 100m - 3500m untuk keperluan demo geospasial (maks 5km radius)
+          distance: Math.floor(Math.random() * 3400) + 100,
+        }))
+
+        setBackendProducts(mapped)
+      } catch (err: any) {
+        console.error('Error fetching marketplace products:', err)
+        setFetchError('Gagal menghubungkan ke server untuk sinkronisasi data aktif.')
+      } finally {
+        setIsFetching(false)
+      }
+    }
+
+    fetchRealData()
+  }, [isAuthenticated, user])
+
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let products = [...mockMarketplaceProducts]
+    // Gunakan backendProducts jika ada data riil
+    let products = [...backendProducts]
 
     // Apply search filter
     if (filters.searchQuery) {
@@ -79,9 +132,9 @@ export default function ConsumerMarketplacePage() {
     })
 
     return products
-  }, [filters])
+  }, [filters, backendProducts])
 
-  const handleProductAction = (product: Product) => {
+  const handleProductAction = (product: FrontendProduct) => {
     if (product.donationStatus === 'donation') {
       // Navigate to claim flow
       router.push(`/consumer/claim/${product.id}`)
@@ -96,12 +149,12 @@ export default function ConsumerMarketplacePage() {
     router.push('/login')
   }
 
-  if (isLoading) {
+  if (isLoading || (isFetching && backendProducts.length === 0)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-outline">Memuat marketplace...</p>
+          <p className="text-sm font-semibold text-[#899483]">Menyinkronkan lapak surplus...</p>
         </div>
       </div>
     )
@@ -161,7 +214,7 @@ export default function ConsumerMarketplacePage() {
               </div>
               
               {/* Profile Avatar */}
-              <Avatar size="default" className="border border-[#899483]/20 shadow-sm cursor-pointer">
+              <Avatar className="w-9 h-9 border border-[#899483]/20 shadow-sm cursor-pointer">
                 <AvatarFallback className="bg-emerald-50 text-emerald-700 font-extrabold uppercase text-xs">
                   {user.username.slice(0, 2)}
                 </AvatarFallback>
@@ -183,6 +236,17 @@ export default function ConsumerMarketplacePage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:pb-8 safe-bottom">
+        {fetchError && (
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-xs font-semibold text-rose-700 flex items-center justify-between">
+            <span>{fetchError} (Menampilkan data lokal sementara)</span>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="inline-flex items-center gap-1 hover:underline text-rose-800"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Reload
+            </button>
+          </div>
+        )}
         {renderActiveView()}
       </main>
 
@@ -195,4 +259,5 @@ export default function ConsumerMarketplacePage() {
     </div>
   )
 }
+
 

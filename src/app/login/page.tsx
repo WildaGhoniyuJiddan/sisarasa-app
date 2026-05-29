@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Store, ShoppingBag, Mail, Lock } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { UserRole } from '@/types'
@@ -72,10 +73,10 @@ export default function LoginPage() {
       } else {
         router.push('/consumer/marketplace')
       }
-    } catch (error) {
+    } catch (error: any) {
       setErrors((prev) => ({
         ...prev,
-        general: 'Login gagal. Silakan coba lagi.',
+        general: error.message || 'Login gagal. Silakan coba lagi.',
       }))
     }
   }
@@ -188,15 +189,12 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <p className="text-sm text-outline">
             Belum punya akun?{' '}
-            <button
-              type="button"
+            <Link
+              href="/register"
               className="text-accent-primary font-semibold hover:underline focus-visible-ring"
-              onClick={() => {
-                alert('Fitur registrasi akan segera hadir!')
-              }}
             >
               Daftar Sekarang
-            </button>
+            </Link>
           </p>
           <p className="text-xs text-outline">
             Dengan masuk, Anda menyetujui{' '}

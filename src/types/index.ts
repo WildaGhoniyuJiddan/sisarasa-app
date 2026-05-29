@@ -26,7 +26,7 @@ export interface AuthState {
 // Product Types
 export type DonationStatus = 'sale' | 'donation'
 
-export type ProductStatus = 'active' | 'claimed' | 'completed' | 'expired'
+export type ProductStatus = 'active' | 'claimed' | 'completed' | 'expired' | 'sold_out'
 
 export interface Product {
   id: string

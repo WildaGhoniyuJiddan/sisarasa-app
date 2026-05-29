@@ -3,35 +3,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, UserRole, AuthState, LoginFormData } from '@/types'
 
+const BASE_URL: string =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
 interface AuthContextType extends AuthState {
+  token: string | null
   login: (data: LoginFormData) => Promise<void>
+  register: (username: string, email: string, password: string, role: UserRole) => Promise<void>
   logout: () => void
   updateUser: (user: Partial<User>) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-// Mock user data for development
-const MOCK_USERS = {
-  seller: {
-    id: 'seller-001',
-    username: 'warung_bahagia',
-    email: 'warung@example.com',
-    role: 'seller' as UserRole,
-    accountStatus: 'active' as const,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  consumer: {
-    id: 'consumer-001',
-    username: 'budi_konsumen',
-    email: 'budi@example.com',
-    role: 'consumer' as UserRole,
-    accountStatus: 'active' as const,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
@@ -39,14 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
     isLoading: true,
   })
+  const [token, setToken] = useState<string | null>(null)
 
-  // Load user from localStorage on mount
+  // Load user & token from localStorage on mount
   useEffect(() => {
     const loadUser = () => {
       try {
         const storedUser = localStorage.getItem('sisarasa_user')
-        if (storedUser) {
+        const storedToken = localStorage.getItem('sisarasa_token')
+        if (storedUser && storedToken) {
           const user = JSON.parse(storedUser) as User
+          setToken(storedToken)
           setAuthState({
             user,
             isAuthenticated: true,
@@ -75,24 +61,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (data: LoginFormData) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }))
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-    // Mock login - use role to determine which mock user to return
-    const mockUser = MOCK_USERS[data.role]
+      const body = await response.json()
 
-    // Store user in localStorage
-    localStorage.setItem('sisarasa_user', JSON.stringify(mockUser))
+      if (!response.ok) {
+        throw new Error(body.detail || body.message || 'Login gagal.')
+      }
 
-    setAuthState({
-      user: mockUser,
-      isAuthenticated: true,
-      isLoading: false,
-    })
+      const receivedUser: User = body.user
+      const receivedToken: string = body.token
+
+      // Store in localStorage
+      localStorage.setItem('sisarasa_user', JSON.stringify(receivedUser))
+      localStorage.setItem('sisarasa_token', receivedToken)
+
+      setToken(receivedToken)
+      setAuthState({
+        user: receivedUser,
+        isAuthenticated: true,
+        isLoading: false,
+      })
+    } catch (err) {
+      setAuthState((prev) => ({ ...prev, isLoading: false }))
+      throw err
+    }
+  }
+
+  const register = async (username: string, email: string, password: string, role: UserRole) => {
+    setAuthState((prev) => ({ ...prev, isLoading: true }))
+
+    try {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          role,
+        }),
+      })
+
+      const body = await response.json()
+
+      if (!response.ok) {
+        throw new Error(body.detail || body.message || 'Registrasi gagal.')
+      }
+
+      // Auto login after registration
+      await login({
+        emailOrUsername: email,
+        password,
+        role,
+      })
+    } catch (err) {
+      setAuthState((prev) => ({ ...prev, isLoading: false }))
+      throw err
+    }
   }
 
   const logout = () => {
     localStorage.removeItem('sisarasa_user')
+    localStorage.removeItem('sisarasa_token')
+    setToken(null)
     setAuthState({
       user: null,
       isAuthenticated: false,
@@ -115,7 +156,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         ...authState,
+        token,
         login,
+        register,
         logout,
         updateUser,
       }}

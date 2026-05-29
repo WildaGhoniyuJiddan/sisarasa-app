@@ -1,5 +1,8 @@
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
-import { MapPin, Sparkles, AlertCircle } from 'lucide-react'
+import { MapPin, Utensils } from 'lucide-react'
 import { Product } from '@/types'
 import { formatCurrency, formatDistance } from '@/lib/utils'
 import FreshnessBadge from './FreshnessBadge'
@@ -17,6 +20,7 @@ export default function ProductCard({ product, onAction }: ProductCardProps) {
   const discountPercentage = Math.round(
     ((product.normalPrice - product.currentPrice) / product.normalPrice) * 100
   )
+  const [imgError, setImgError] = useState(false)
 
   const handleAction = () => {
     if (onAction) {
@@ -24,7 +28,7 @@ export default function ProductCard({ product, onAction }: ProductCardProps) {
     }
   }
 
-  // Fallback image using placeholder structure
+  // Use dynamic photo URL from database, fallback to local placeholder
   const imageUrl = product.photoUrl || '/images/sayur.jpg'
 
   return (
@@ -37,18 +41,23 @@ export default function ProductCard({ product, onAction }: ProductCardProps) {
           <FreshnessBadge cookedAt={product.cookedAt} />
         </div>
 
-        {/* Product Image with Next.js <Image /> */}
+        {/* Product Image with Next.js <Image /> or styled fallback */}
         <div className="relative w-full h-full">
-          <Image
-            src={imageUrl}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 112px"
-            className="object-cover transition-transform duration-500 hover:scale-110"
-            onError={(e) => {
-              // Fallback handled gracefully
-            }}
-          />
+          {!imgError ? (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 112px"
+              className="object-cover transition-transform duration-500 hover:scale-110"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-50 text-emerald-600">
+              <Utensils className="w-8 h-8 mb-1" />
+              <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-wider">Foto</span>
+            </div>
+          )}
         </div>
 
         {/* Discount Badge - Bottom Left */}

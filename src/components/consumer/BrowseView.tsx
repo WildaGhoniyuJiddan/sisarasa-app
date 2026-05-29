@@ -5,7 +5,7 @@ import { Product } from '@/types'
 import ProductCard from './ProductCard'
 import FilterBar, { FilterOptions } from './FilterBar'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Card } from '@/components/ui/card'
 
 interface BrowseViewProps {
   filters: FilterOptions
@@ -99,21 +99,23 @@ export default function BrowseView({
       )}
 
       {/* Info Banner */}
-      <div>
-        <Alert className="border-emerald-100 bg-emerald-50/10 p-4 md:p-6 rounded-2xl shadow-sm">
-          <Sparkles className="w-5 h-5 text-emerald-600 mt-0.5" />
-          <AlertTitle className="text-emerald-800 font-extrabold text-sm md:text-base tracking-tight mb-2">
-            Cara Kerja Penyelamatan Pangan SisaRasa
-          </AlertTitle>
-          <AlertDescription className="text-emerald-700/90 leading-relaxed text-xs md:text-sm">
-            <ul className="space-y-2 mt-2 font-medium">
+      <Card className="border-emerald-100 bg-emerald-50/10 p-4 md:p-6 rounded-2xl shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 flex-shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-left">
+            <h3 className="text-emerald-800 font-extrabold text-sm md:text-base tracking-tight mb-2">
+              Cara Kerja Penyelamatan Pangan SisaRasa
+            </h3>
+            <ul className="space-y-2 text-emerald-700/90 leading-relaxed text-xs md:text-sm font-medium">
               <li>• <strong>Beli Hemat:</strong> Selamatkan makanan surplus yang layak dengan diskon reguler hingga 50% untuk mengurangi limbah ekonomi UMKM.</li>
               <li>• <strong>Claim Donasi:</strong> Dapatkan makanan secara gratis untuk pihak yang berhak dengan verifikasi identitas di awal (langkah anti-hoarding).</li>
               <li>• <strong>Pickup Mandiri:</strong> Ambil pesanan langsung ke lokasi mitra warung terdekat dalam radius 5 km sesuai petunjuk Google Maps.</li>
             </ul>
-          </AlertDescription>
-        </Alert>
-      </div>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

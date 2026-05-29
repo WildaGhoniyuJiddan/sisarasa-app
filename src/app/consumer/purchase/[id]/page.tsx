@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { mockMarketplaceProducts } from '@/lib/mock-data'
 import { Product } from '@/types'
 import { getHoursSince, getFreshnessStatus, formatCurrency } from '@/lib/utils'
 import { ArrowLeft, Sparkles, MapPin, Clock, QrCode, CreditCard, Coins, CheckCircle2, ShoppingBag, ShieldCheck, Ticket, Plus, Minus } from 'lucide-react'
@@ -11,16 +10,21 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+import { getProduct, buyProduct } from '@/services/api'
+import { DonationStatus, ProductStatus } from '@/types'
+
 export default function PurchaseProductPage() {
   const router = useRouter()
   const params = useParams()
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading, token } = useAuth()
   
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
   const [paymentMethod, setPaymentMethod] = useState<string>('wallet')
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [orderCode, setOrderCode] = useState<string>('')
+  const [whatsappLink, setWhatsappLink] = useState<string>('')
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   // Redirect if not authenticated or not a consumer
   useEffect(() => {
@@ -31,15 +35,34 @@ export default function PurchaseProductPage() {
 
   // Fetch product details
   useEffect(() => {
-    if (params?.id) {
-      const found = mockMarketplaceProducts.find((p) => p.id === params.id)
-      if (found) {
-        setProduct(found)
-      } else {
-        alert('Produk tidak ditemukan!')
+    if (!params?.id) return
+
+    const fetchProductDetails = async () => {
+      try {
+        const p = await getProduct(params.id as string)
+        setProduct({
+          id: p.id,
+          sellerId: p.sellerId,
+          sellerName: 'Warung Mitra SisaRasa',
+          name: p.name,
+          description: 'Makanan surplus lezat, higienis, dan dikelola secara aman.',
+          photoUrl: p.photoUrl || '/images/sayur.jpg',
+          normalPrice: p.normalPrice,
+          currentPrice: p.currentPrice,
+          cookedAt: p.cookedAt,
+          totalPortions: p.portions || 1,
+          availablePortions: p.availablePortions !== undefined ? p.availablePortions : (p.portions || 1),
+          donationStatus: 'sale' as DonationStatus,
+          status: 'active' as ProductStatus,
+        })
+      } catch (err: any) {
+        console.error('Error fetching product for purchase:', err)
+        alert('Produk tidak ditemukan atau gagal menyinkronkan data dengan server!')
         router.push('/consumer/marketplace')
       }
     }
+
+    fetchProductDetails()
   }, [params, router])
 
   const handleIncrement = () => {
@@ -54,11 +77,24 @@ export default function PurchaseProductPage() {
     }
   }
 
-  const handleConfirmPurchase = () => {
-    // Generate order code
-    const rand = Math.floor(1000 + Math.random() * 9000)
-    setOrderCode(`SR-ORDER-${rand}`)
-    setIsSuccess(true)
+  const handleConfirmPurchase = async () => {
+    if (!token || !product) {
+      alert('Sesi Anda telah kedaluwarsa atau detail produk belum siap.')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await buyProduct(product.id, quantity, paymentMethod, token)
+      setOrderCode(response.order_code)
+      setWhatsappLink(response.whatsapp_link)
+      setIsSuccess(true)
+    } catch (err: any) {
+      console.error('Error confirming purchase:', err)
+      alert(err.message || 'Gagal memproses pembelian surplus makanan. Silakan coba lagi.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isLoading || !product) {
@@ -156,7 +192,15 @@ export default function PurchaseProductPage() {
           </Card>
         </main>
 
-        <div className="px-4 max-w-md mx-auto w-full">
+        <div className="px-4 max-w-md mx-auto w-full space-y-2">
+          {whatsappLink && (
+            <Button
+              onClick={() => window.open(whatsappLink, '_blank')}
+              className="w-full bg-[#25D366] hover:bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <span>Hubungi Warung (WhatsApp)</span>
+            </Button>
+          )}
           <Button
             onClick={() => router.push('/consumer/marketplace')}
             className="w-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold py-5 rounded-2xl shadow-sm transition-all"
@@ -321,9 +365,10 @@ export default function PurchaseProductPage() {
       <div className="px-4 max-w-md mx-auto w-full">
         <Button
           onClick={handleConfirmPurchase}
-          className="w-full bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white font-black py-6 rounded-2xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+          disabled={isSubmitting}
+          className="w-full bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white font-black py-6 rounded-2xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          <span>Konfirmasi & Bayar Sekarang</span>
+          <span>{isSubmitting ? 'Memproses...' : 'Konfirmasi & Bayar Sekarang'}</span>
         </Button>
       </div>
     </div>

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { mockMarketplaceProducts } from '@/lib/mock-data'
 import { Product } from '@/types'
 import { getHoursSince, getFreshnessStatus } from '@/lib/utils'
 import { ArrowLeft, Sparkles, MapPin, Clock, ShieldCheck, QrCode, FileText, CheckCircle2, ChevronRight, Info, Camera, Gift, Heart, ArrowRight } from 'lucide-react'
@@ -11,11 +10,12 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { getProduct, claimDonation, completeTransaction } from '@/services/api'
 
 export default function ClaimDonationPage() {
   const router = useRouter()
   const params = useParams()
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading, token } = useAuth()
   
   const [product, setProduct] = useState<Product | null>(null)
   
@@ -29,6 +29,8 @@ export default function ClaimDonationPage() {
   const [isFullyCompleted, setIsFullyCompleted] = useState<boolean>(false) // Shows final congratulatory impact screen
   
   const [claimCode, setClaimCode] = useState<string>('')
+  const [transactionId, setTransactionId] = useState<string>('')
+  const [whatsappLink, setWhatsappLink] = useState<string>('')
 
   // Handover Form State
   const [handoverPhotoUploaded, setHandoverPhotoUploaded] = useState<boolean>(false)
@@ -43,18 +45,37 @@ export default function ClaimDonationPage() {
 
   // Fetch product details
   useEffect(() => {
-    if (params?.id) {
-      const found = mockMarketplaceProducts.find((p) => p.id === params.id)
-      if (found) {
-        setProduct(found)
-      } else {
-        alert('Produk tidak ditemukan!')
+    if (!params?.id) return
+
+    const fetchProductDetails = async () => {
+      try {
+        const p = await getProduct(params.id as string)
+        setProduct({
+          id: p.id,
+          sellerId: p.sellerId,
+          sellerName: 'Warung Mitra SisaRasa',
+          name: p.name,
+          description: 'Makanan surplus lezat, higienis, dan dikelola secara aman.',
+          photoUrl: p.photoUrl || '/images/sayur.jpg',
+          normalPrice: p.normalPrice,
+          currentPrice: p.currentPrice,
+          cookedAt: p.cookedAt,
+          totalPortions: p.portions || 1,
+          availablePortions: p.availablePortions !== undefined ? p.availablePortions : (p.portions || 1),
+          donationStatus: 'donation',
+          status: 'active',
+        })
+      } catch (err: any) {
+        console.error('Error fetching product for claim:', err)
+        alert('Produk tidak ditemukan atau gagal menyinkronkan data dengan server!')
         router.push('/consumer/marketplace')
       }
     }
+
+    fetchProductDetails()
   }, [params, router])
 
-  const handleConfirmClaim = () => {
+  const handleConfirmClaim = async () => {
     if (!agreed) {
       alert('Anda harus menyetujui pernyataan kelayakan konsumsi.')
       return
@@ -63,17 +84,30 @@ export default function ClaimDonationPage() {
       alert('Tolong unggah foto identitas untuk verifikasi anti-hoarding.')
       return
     }
+    if (!token) {
+      alert('Autentikasi diperlukan. Silakan login kembali.')
+      return
+    }
 
-    const rand = Math.floor(1000 + Math.random() * 9000)
-    setClaimCode(`SR-CLAIM-${rand}`)
-    setIsSuccess(true)
+    try {
+      const idProofUrl = 'https://firebasestorage.googleapis.com/v0/b/sisarasa-app/o/ktp_placeholder.png'
+      const response = await claimDonation(params.id as string, agreed, idProofUrl, token)
+      
+      setClaimCode(response.claim_code)
+      setTransactionId(response.transaction_id)
+      setWhatsappLink(response.whatsapp_link)
+      setIsSuccess(true)
+    } catch (err: any) {
+      console.error('Gagal melakukan klaim donasi:', err)
+      alert(err.message || 'Gagal melakukan klaim donasi. Silakan coba lagi.')
+    }
   }
 
   const handleGoToHandover = () => {
     setIsHandingOver(true)
   }
 
-  const handleSubmitHandover = () => {
+  const handleSubmitHandover = async () => {
     if (!handoverPhotoUploaded) {
       alert('Tolong ambil/unggah foto bukti penyerahan makanan.')
       return
@@ -82,7 +116,19 @@ export default function ClaimDonationPage() {
       alert('Tolong tuliskan keterangan penerima manfaat (misal: Tunawisma perempatan atau Panti Asuhan).')
       return
     }
-    setIsFullyCompleted(true)
+    if (!token) {
+      alert('Autentikasi diperlukan. Silakan login kembali.')
+      return
+    }
+
+    try {
+      const receiptProofUrl = 'https://firebasestorage.googleapis.com/v0/b/sisarasa-app/o/handover_placeholder.png'
+      await completeTransaction(transactionId, receiptProofUrl, token)
+      setIsFullyCompleted(true)
+    } catch (err: any) {
+      console.error('Gagal menyelesaikan transaksi donasi:', err)
+      alert(err.message || 'Gagal mengirim bukti serah terima. Silakan coba lagi.')
+    }
   }
 
   if (isLoading || !product) {
@@ -332,6 +378,22 @@ export default function ClaimDonationPage() {
                 </div>
               </div>
             </div>
+
+            {whatsappLink && (
+              <div className="pt-4 border-t border-slate-100">
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold rounded-2xl shadow-md transition-all duration-200 active:scale-95 text-sm"
+                >
+                  <svg className="w-5 h-5 shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.59 1.97 14.12 .947 11.5 .947c-5.442 0-9.87 4.372-9.874 9.802-.001 1.768.479 3.494 1.39 5.039l-.997 3.642 3.734-.979zm12.315-6.615c-.328-.164-1.94-.959-2.24-1.069-.3-.109-.519-.164-.738.164-.219.328-.847 1.069-1.037 1.288-.19.219-.38.246-.708.082-.328-.164-1.386-.511-2.64-1.63-1.01-.902-1.693-2.016-1.89-2.344-.197-.328-.021-.505.143-.668.148-.146.328-.383.493-.574.164-.191.219-.328.328-.546.11-.219.055-.41-.028-.574-.082-.164-.738-1.777-1.01-2.434-.265-.636-.534-.55-.738-.56-.19-.01-.41-.01-.629-.01-.219 0-.574.082-.875.41-.3.328-1.148 1.12-1.148 2.733 0 1.612 1.175 3.17 1.339 3.388.164.219 2.31 3.528 5.596 4.952.781.339 1.39.542 1.866.693.785.249 1.499.214 2.062.13.629-.094 1.94-.793 2.214-1.559.274-.766.274-1.422.191-1.559-.082-.137-.3-.219-.629-.383z"/>
+                  </svg>
+                  <span>Hubungi Penjual via WhatsApp</span>
+                </a>
+              </div>
+            )}
           </Card>
 
           {/* Social Proof Info Banner */}
