@@ -32,6 +32,7 @@ export default function FoodAnalysisForm() {
   // --- Upload step ---
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [distributionType, setDistributionType] = useState<'paid' | 'free'>('paid')
   const [normalPrice, setNormalPrice] = useState<string>('')
   const [portions, setPortions] = useState<string>('')
   const [isDragActive, setIsDragActive] = useState(false)
@@ -85,6 +86,7 @@ export default function FoodAnalysisForm() {
     setSelectedFile(null)
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
+    setDistributionType('paid')
     setNormalPrice('')
     setPortions('')
     setAnalysisResult(null)
@@ -96,9 +98,9 @@ export default function FoodAnalysisForm() {
   // --- Step 1 → Step 2: Analyze ---
   const handleAnalyze = async () => {
     if (!selectedFile) return
-    const priceNum = parseInt(normalPrice)
+    const priceNum = distributionType === 'free' ? 10000 : parseInt(normalPrice)
     const portionsNum = parseInt(portions)
-    if (!priceNum || priceNum <= 0) { setError('Masukkan harga normal yang valid.'); return }
+    if (distributionType !== 'free' && (!priceNum || priceNum <= 0)) { setError('Masukkan harga normal yang valid.'); return }
     if (!portionsNum || portionsNum <= 0) { setError('Masukkan jumlah porsi yang valid.'); return }
 
     setIsAnalyzing(true)
@@ -107,6 +109,11 @@ export default function FoodAnalysisForm() {
 
     try {
       const result = await analyzeFood(selectedFile, priceNum, portionsNum)
+      if (distributionType === 'free') {
+        result.normal_price = 0
+        result.suggested_selling_price = 0
+        result.discount_percentage = 100
+      }
       setAnalysisResult(result)
       setCurrentStep('review')
     } catch (err: unknown) {
@@ -132,9 +139,9 @@ export default function FoodAnalysisForm() {
       await createProduct(
         {
           name: analysisResult.food_name,
-          normalPrice: analysisResult.normal_price,
-          currentPrice: analysisResult.suggested_selling_price,
-          hppFloor: Math.round(analysisResult.normal_price * 0.5), // 50% HPP Limit dari PRD
+          normalPrice: distributionType === 'free' ? 0 : analysisResult.normal_price,
+          currentPrice: distributionType === 'free' ? 0 : analysisResult.suggested_selling_price,
+          hppFloor: distributionType === 'free' ? 0 : Math.round(analysisResult.normal_price * 0.5), // 50% HPP Limit dari PRD
           sellerId: user?.id || '',
           status: 'active',
           photoUrl: analysisResult.photo_url || '',
@@ -255,6 +262,43 @@ export default function FoodAnalysisForm() {
 
               {/* Right: Price & Portions Input */}
               <div className="space-y-5">
+                {/* Tipe Distribusi Toggle */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Distribution Type (Tipe Distribusi)
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDistributionType('paid')
+                        setNormalPrice('')
+                      }}
+                      className={`py-3 px-4 rounded-xl font-bold text-xs uppercase border tracking-wider transition-all duration-200 text-center ${
+                        distributionType === 'paid'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/10'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      Berbayar (Surplus)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDistributionType('free')
+                        setNormalPrice('0')
+                      }}
+                      className={`py-3 px-4 rounded-xl font-bold text-xs uppercase border tracking-wider transition-all duration-200 text-center ${
+                        distributionType === 'free'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/10'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      Gratis (Donasi Sosial)
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     <Tag className="w-4 h-4 inline mr-1.5 text-emerald-500" />
@@ -262,13 +306,18 @@ export default function FoodAnalysisForm() {
                   </label>
                   <input
                     type="number"
-                    value={normalPrice}
+                    value={distributionType === 'free' ? '0' : normalPrice}
                     onChange={(e) => setNormalPrice(e.target.value)}
-                    placeholder="Contoh: 25000"
+                    disabled={distributionType === 'free'}
+                    placeholder={distributionType === 'free' ? 'Gratis' : 'Contoh: 25000'}
                     min={1000}
-                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 text-base font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 text-base font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1.5">Harga sebelum diskon surplus yang biasa Anda jual</p>
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    {distributionType === 'free' 
+                      ? 'Harga dinonaktifkan untuk distribusi donasi sosial' 
+                      : 'Harga sebelum diskon surplus yang biasa Anda jual'}
+                  </p>
                 </div>
 
                 <div>
@@ -298,7 +347,7 @@ export default function FoodAnalysisForm() {
                 {/* Analyze Button */}
                 <button
                   onClick={handleAnalyze}
-                  disabled={!selectedFile || !normalPrice || !portions || isAnalyzing}
+                  disabled={!selectedFile || (distributionType !== 'free' && !normalPrice) || !portions || isAnalyzing}
                   className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
                 >
                   {isAnalyzing ? (
@@ -354,30 +403,38 @@ export default function FoodAnalysisForm() {
                 <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <TrendingDown className="w-5 h-5 text-emerald-600" />
-                    <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Saran Harga AI</h4>
+                    <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                      {distributionType === 'free' ? 'Status Distribusi' : 'Saran Harga AI'}
+                    </h4>
                   </div>
 
                   {/* Normal Price (strikethrough) */}
                   <div className="flex items-baseline justify-between">
                     <span className="text-sm text-slate-500">Harga Normal</span>
-                    <span className="text-lg text-slate-400 line-through font-medium">{formatRp(analysisResult.normal_price)}</span>
+                    <span className="text-lg text-slate-400 line-through font-medium font-mono">
+                      {distributionType === 'free' ? 'Rp 0' : formatRp(analysisResult.normal_price)}
+                    </span>
                   </div>
 
                   {/* Discount Badge */}
                   <div className="flex items-center justify-center">
                     <div className="px-4 py-2 bg-rose-500 text-white rounded-full text-sm font-bold shadow-md">
-                      DISKON {analysisResult.discount_percentage}%
+                      {distributionType === 'free' ? 'GRATIS / 100% DONASI' : `DISKON ${analysisResult.discount_percentage}%`}
                     </div>
                   </div>
 
                   {/* Suggested Selling Price */}
                   <div className="flex items-baseline justify-between pt-2 border-t border-emerald-200/60 dark:border-emerald-800/40">
                     <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Harga Jual Surplus</span>
-                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatRp(analysisResult.suggested_selling_price)}</span>
+                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                      {distributionType === 'free' ? 'GRATIS (DONASI)' : formatRp(analysisResult.suggested_selling_price)}
+                    </span>
                   </div>
 
                   <p className="text-xs text-slate-500 italic leading-relaxed">
-                    Anda menghemat {formatRp(analysisResult.normal_price - analysisResult.suggested_selling_price)} per porsi untuk konsumen
+                    {distributionType === 'free' 
+                      ? 'Didistribusikan secara sosial untuk membantu panti asuhan & dhuafa terverifikasi'
+                      : `Anda menghemat ${formatRp(analysisResult.normal_price - analysisResult.suggested_selling_price)} per porsi untuk konsumen`}
                   </p>
                 </div>
 

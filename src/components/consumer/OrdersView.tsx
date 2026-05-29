@@ -1,21 +1,63 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/lib/auth-context'
+import { getTransactions, Transaction } from '@/services/api'
 import { ClipboardList, MapPin, QrCode, CheckCircle2, Clock } from 'lucide-react'
-import { mockTransactions, mockMarketplaceProducts } from '@/lib/mock-data'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
 
 export default function OrdersView() {
-  // Join transactions with product details
-  const orders = mockTransactions.map((tx) => {
-    const product = mockMarketplaceProducts.find((p) => p.id === tx.productId)
-    return {
-      ...tx,
-      product,
+  const { token, isAuthenticated } = useAuth()
+  const [orders, setOrders] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setLoading(false)
+      return
     }
-  })
+
+    const fetchOrders = async () => {
+      try {
+        setLoading(true)
+        const data = await getTransactions(token)
+        
+        // Sort chronologically by claimed_at descending (newest first)
+        const sorted = [...data].sort((a, b) => {
+          return new Date(b.claimed_at).getTime() - new Date(a.claimed_at).getTime()
+        })
+        
+        setOrders(sorted)
+      } catch (err) {
+        console.error('Error fetching consumer orders:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [isAuthenticated, token])
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Shimmer Header */}
+        <div className="space-y-2">
+          <div className="h-6 w-48 bg-slate-200 rounded-lg" />
+          <div className="h-4 w-64 bg-slate-200 rounded-lg" />
+        </div>
+
+        {/* Shimmer list */}
+        <div className="space-y-4">
+          <div className="h-32 w-full bg-slate-200 rounded-2xl" />
+          <div className="h-32 w-full bg-slate-200 rounded-2xl" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -29,9 +71,9 @@ export default function OrdersView() {
       {orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order) => {
-            const isClaim = order.transactionType === 'claim'
-            const isCompleted = order.status === 'completed'
-            const date = new Date(order.claimedAt).toLocaleDateString('id-ID', {
+            const isClaim = order.transaction_type === 'claim' || order.current_price === 0
+            const isCompleted = order.status === 'completed' || order.status === 'sold_out'
+            const date = new Date(order.claimed_at).toLocaleDateString('id-ID', {
               day: 'numeric',
               month: 'short',
               year: 'numeric',
@@ -48,7 +90,7 @@ export default function OrdersView() {
                 <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-50 mb-3">
                   <div>
                     <span className="text-xs font-black text-slate-800 tracking-tight">
-                      {order.product?.sellerName || 'Mitra SisaRasa'}
+                      {order.store_name || 'Mitra SisaRasa'}
                     </span>
                     <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{date}</p>
                   </div>
@@ -71,7 +113,7 @@ export default function OrdersView() {
 
                   <div className="flex-1 min-w-0">
                     <h3 className="font-extrabold text-slate-800 text-sm md:text-base truncate tracking-tight">
-                      {order.product?.name || 'Menu Pangan Lezat'}
+                      {order.product_name || 'Menu Pangan Lezat'}
                     </h3>
                     
                     <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -81,10 +123,10 @@ export default function OrdersView() {
                         </Badge>
                       ) : (
                         <span className="text-xs font-black text-emerald-600">
-                          {order.product ? formatCurrency(order.product.currentPrice) : 'Rp 0'}
+                          {formatCurrency(order.current_price || 0)}
                         </span>
                       )}
-                      <span className="text-[10px] text-slate-400 font-medium">• 1 Porsi</span>
+                      <span className="text-[10px] text-slate-400 font-medium">• {order.quantity || 1} Porsi</span>
                     </div>
                   </div>
                 </div>
@@ -95,7 +137,7 @@ export default function OrdersView() {
                     {isCompleted ? (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        <span>Berhasil Terselamatkan</span>
+                        <span className="text-emerald-600 font-extrabold">Berhasil Terselamatkan</span>
                       </>
                     ) : (
                       <>
@@ -110,7 +152,7 @@ export default function OrdersView() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => alert('Barcode pengambilan: SR-' + order.id.toUpperCase())}
+                        onClick={() => alert(`Kode verifikasi pengambilan: ${order.claim_code || order.order_code || 'SR-' + order.id.toUpperCase()}`)}
                         className="border-slate-200 text-slate-600 rounded-xl font-bold px-3 py-1.5 transition-all text-xs flex items-center gap-1.5"
                       >
                         <QrCode className="w-3.5 h-3.5" />
@@ -118,7 +160,7 @@ export default function OrdersView() {
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => alert('Membuka Google Maps menuju lokasi ' + (order.product?.sellerName || 'Mitra'))}
+                        onClick={() => alert('Membuka Google Maps menuju lokasi ' + (order.store_name || 'Mitra'))}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold px-3 py-1.5 transition-all text-xs flex items-center gap-1.5"
                       >
                         <MapPin className="w-3.5 h-3.5" />

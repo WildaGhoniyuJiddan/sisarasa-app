@@ -6,17 +6,19 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+import { useRouter } from 'next/navigation'
+
 interface AccountViewProps {
   user: any
   onLogout: () => void
 }
 
 export default function AccountView({ user, onLogout }: AccountViewProps) {
+  const router = useRouter()
   const menuItems = [
-    { id: 'profile', label: 'Detail Profil', icon: User, desc: 'Kelola informasi profil personal Anda' },
-    { id: 'verification', label: 'Verifikasi ID Sosial', icon: ShieldCheck, desc: 'Status verifikasi penerima donasi sosial' },
-    { id: 'locations', label: 'Alamat Ambil Default', icon: MapPin, desc: 'Simpan radius pencarian warung terdekat' },
-    { id: 'help', label: 'Bantuan & Panduan', icon: Sparkles, desc: 'Petunjuk lengkap penyelamatan pangan' },
+    { id: 'profile', label: 'Detail Profil', icon: User, desc: 'Kelola informasi profil personal Anda', path: '/consumer/account/profile' },
+    { id: 'verification', label: 'Verifikasi ID Sosial', icon: ShieldCheck, desc: 'Status verifikasi penerima donasi sosial', path: '/consumer/account/social-verification' },
+    { id: 'help', label: 'Bantuan & Panduan', icon: Sparkles, desc: 'Petunjuk lengkap penyelamatan pangan', path: '/consumer/account/help' },
   ]
 
   return (
@@ -52,7 +54,7 @@ export default function AccountView({ user, onLogout }: AccountViewProps) {
           return (
             <button
               key={item.id}
-              onClick={() => alert(`Fitur ${item.label} akan segera hadir!`)}
+              onClick={() => router.push(item.path)}
               className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-50 hover:border-emerald-100 bg-white hover:bg-slate-50/50 transition-all duration-200 text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-4 min-w-0">

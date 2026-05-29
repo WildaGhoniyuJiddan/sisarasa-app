@@ -59,6 +59,7 @@ export interface Store {
   latitude: number;
   longitude: number;
   address: string;
+  phone?: string | null;
   created_at?: string | null;
 }
 
@@ -530,4 +531,43 @@ export async function buyProduct(
       payment_method: paymentMethod,
     }),
   });
+}
+
+export interface Transaction {
+  id: string;
+  product_id: string;
+  product_name: string;
+  consumer_id: string;
+  transaction_type: 'claim' | 'purchase';
+  quantity?: number;
+  payment_method?: string;
+  total_price: number;
+  liability_agreement: boolean;
+  id_proof_url?: string | null;
+  receipt_proof_url?: string | null;
+  claimed_at: string;
+  completed_at?: string | null;
+  status: 'pending' | 'completed' | 'sold_out' | 'cancelled';
+  order_code?: string;
+  claim_code?: string;
+  store_id: string;
+  store_name: string;
+  normal_price: number;
+  current_price: number;
+}
+
+export interface ListTransactionsResponse {
+  success: boolean;
+  transactions: Transaction[];
+}
+
+/**
+ * Mengambil daftar riwayat transaksi pengguna.
+ */
+export async function getTransactions(token: string): Promise<Transaction[]> {
+  const data = await apiFetch<ListTransactionsResponse>("/transactions", {
+    method: "GET",
+    headers: authHeaders(token),
+  });
+  return data.transactions || [];
 }

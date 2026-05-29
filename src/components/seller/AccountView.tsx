@@ -6,17 +6,20 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+import { useRouter } from 'next/navigation'
+
 interface AccountViewProps {
   user: any
   onLogout: () => void
 }
 
 export default function AccountView({ user, onLogout }: AccountViewProps) {
+  const router = useRouter()
   const menuItems = [
-    { id: 'store', label: 'Detail Warung & Lokasi', icon: Store, desc: 'Kelola alamat presisi Maps dan foto warung' },
-    { id: 'hours', label: 'Jam Operasional Ambil', icon: Sparkles, desc: 'Atur batas jam pengambilan porsi sisa' },
-    { id: 'verification', label: 'Sertifikasi Kehalalan Pangan', icon: ShieldCheck, desc: 'Status verifikasi kelayakan produk UMKM' },
-    { id: 'wallet', label: 'Informasi Dompet & Pencairan', icon: User, desc: 'Kelola rekening bank hasil penjualan surplus' },
+    { id: 'store', label: 'Detail Warung & Lokasi', icon: Store, desc: 'Kelola alamat presisi Maps dan foto warung', path: '/seller/dashboard/account/details' },
+    { id: 'hours', label: 'Jam Operasional Ambil', icon: Sparkles, desc: 'Atur batas jam pengambilan porsi sisa', path: '/seller/dashboard/account/hours' },
+    { id: 'verification', label: 'Sertifikasi Kehalalan Pangan', icon: ShieldCheck, desc: 'Status verifikasi kelayakan produk UMKM', path: '/seller/dashboard/account/halal-verification' },
+    { id: 'wallet', label: 'Informasi Dompet & Pencairan', icon: User, desc: 'Kelola rekening bank hasil penjualan surplus', path: '/seller/dashboard/account/wallet' },
   ]
 
   return (
@@ -52,7 +55,7 @@ export default function AccountView({ user, onLogout }: AccountViewProps) {
           return (
             <button
               key={item.id}
-              onClick={() => alert(`Fitur ${item.label} akan segera hadir!`)}
+              onClick={() => router.push(item.path)}
               className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-50 hover:border-emerald-100 bg-white hover:bg-slate-50/50 transition-all duration-200 text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-4 min-w-0">

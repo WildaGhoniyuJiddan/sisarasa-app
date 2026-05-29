@@ -1,16 +1,91 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/lib/auth-context'
+import { getTransactions } from '@/services/api'
 import { Leaf, Heart, Coins, Trophy, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 
 export default function ImpactView() {
-  // Mock data for consumer impact
-  const stats = {
-    mealsSaved: 8,
-    wasteSavedKg: 2.4, // kg of waste prevented
-    co2Reduced: 6.0, // kg of CO2 offset
-    moneySaved: 75000, // Rp saved
-    treesEquivalent: 1, // setara pohon
+  const { token, isAuthenticated } = useAuth()
+  const [stats, setStats] = useState({
+    mealsSaved: 0,
+    wasteSavedKg: 0.0,
+    co2Reduced: 0.0,
+    moneySaved: 0,
+    treesEquivalent: 0,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setLoading(false)
+      return
+    }
+
+    const fetchImpact = async () => {
+      try {
+        setLoading(true)
+        const transactions = await getTransactions(token)
+        
+        // 1. Filter live completed transactions
+        const completedTransactions = transactions.filter(
+          (t) => t.status === 'completed' || t.status === 'sold_out'
+        )
+
+        // 2. Bind math formulas for environmental metrics
+        const mealsSaved = completedTransactions.length
+        const wasteSavedKg = parseFloat((mealsSaved * 0.3).toFixed(1))
+        const co2Reduced = parseFloat((mealsSaved * 0.75).toFixed(1))
+        
+        // 3. Bind financial savings calculations (normalPrice - currentPrice)
+        const moneySaved = completedTransactions.reduce(
+          (sum, t) => sum + ((t.normal_price || 0) - (t.current_price || 0)), 
+          0
+        )
+        
+        // Equivalent to trees saved ratio
+        const treesEquivalent = Math.max(0, Math.round(co2Reduced / 6.0))
+
+        setStats({
+          mealsSaved,
+          wasteSavedKg,
+          co2Reduced,
+          moneySaved,
+          treesEquivalent,
+        })
+      } catch (err) {
+        console.error('Error fetching dynamic environmental impact:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchImpact()
+  }, [isAuthenticated, token])
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Shimmer Header */}
+        <div className="space-y-2">
+          <div className="h-6 w-48 bg-slate-200 rounded-lg" />
+          <div className="h-4 w-64 bg-slate-200 rounded-lg" />
+        </div>
+
+        {/* Shimmer Main Card */}
+        <div className="h-44 w-full bg-slate-200 rounded-2xl" />
+
+        {/* Shimmer Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-28 bg-slate-200 rounded-xl" />
+          <div className="h-28 bg-slate-200 rounded-xl" />
+        </div>
+
+        {/* Shimmer Badge */}
+        <div className="h-24 w-full bg-slate-200 rounded-xl" />
+      </div>
+    )
   }
 
   return (
@@ -18,7 +93,9 @@ export default function ImpactView() {
       {/* Title Header */}
       <div>
         <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Dampak Hijau Anda</h2>
-        <p className="text-xs md:text-sm text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Kontribusi penyelamatan lingkungan Anda</p>
+        <p className="text-xs md:text-sm text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
+          Kontribusi penyelamatan lingkungan Anda
+        </p>
       </div>
 
       {/* Main Metric - Waste Saved */}
@@ -59,7 +136,7 @@ export default function ImpactView() {
           <p className="text-xl font-black text-slate-800 tracking-tight">
             {stats.mealsSaved} Porsi
           </p>
-          <p className="text-[10px] text-slate-400 font-medium mt-1">Setara {stats.wasteSavedKg} kg sisa pangan</p>
+          <p className="text-[10px] text-slate-400 font-medium mt-1">Setara {stats.wasteSavedKg.toFixed(1)} kg sisa pangan</p>
         </Card>
 
         {/* Cost Savings */}
