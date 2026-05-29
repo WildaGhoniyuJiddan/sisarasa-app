@@ -3,8 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, UserRole, AuthState, LoginFormData } from '@/types'
 
-const BASE_URL: string =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const rawApiUrl: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE_URL: string = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
 
 interface AuthContextType extends AuthState {
   token: string | null
