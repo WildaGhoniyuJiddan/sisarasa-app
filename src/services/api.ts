@@ -15,8 +15,7 @@
 // Base Configuration
 // ============================================================
 
-const rawApiUrl: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-const BASE_URL: string = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
+const BASE_URL: string = "https://sisarasa-backend-231375803214.asia-southeast2.run.app/api/v1";
 
 // ============================================================
 // TypeScript Interfaces
@@ -128,6 +127,10 @@ export type CreateStorePayload = Omit<Store, "id" | "created_at">;
  * Mengubah data product snake_case dari API Backend menjadi camelCase untuk Frontend.
  */
 export function mapToFrontendProduct(p: ApiProduct): Product {
+  let finalPhotoUrl = p.photo_url || undefined;
+  if (finalPhotoUrl && finalPhotoUrl.startsWith("http://localhost:8000")) {
+    finalPhotoUrl = finalPhotoUrl.replace("http://localhost:8000", "https://sisarasa-backend-231375803214.asia-southeast2.run.app");
+  }
   return {
     id: p.id,
     name: p.name,
@@ -137,7 +140,7 @@ export function mapToFrontendProduct(p: ApiProduct): Product {
     sellerId: p.store_id || 'unknown',
     status: (p.status === 'deleted' ? 'deleted' : 'active') as 'active' | 'deleted',
     cookedAt: p.created_at || new Date().toISOString(),
-    photoUrl: p.photo_url || undefined,
+    photoUrl: finalPhotoUrl || '/images/sayur.jpg',
     portions: p.portions || 1,
     availablePortions: p.available_portions !== undefined ? p.available_portions : (p.portions || 1),
   };
@@ -570,4 +573,20 @@ export async function getTransactions(token: string): Promise<Transaction[]> {
     headers: authHeaders(token),
   });
   return data.transactions || [];
+}
+
+export interface SellerStats {
+  success: boolean;
+  revenue: number;
+  total_sold: number;
+}
+
+/**
+ * Mengambil ringkasan statistik performa penjualan surplus untuk merchant/seller.
+ */
+export async function getSellerStats(token: string): Promise<SellerStats> {
+  return await apiFetch<SellerStats>("/transactions/stats", {
+    method: "GET",
+    headers: authHeaders(token),
+  });
 }

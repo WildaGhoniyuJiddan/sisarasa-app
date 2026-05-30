@@ -12,19 +12,23 @@ interface DashboardViewProps {
   user: any
   router: any
   products: Product[]
+  revenue?: number
+  totalSold?: number
 }
 
 export default function DashboardView({
   user,
   router,
   products,
+  revenue,
+  totalSold,
 }: DashboardViewProps) {
-  // Compute real metrics from live product data
-  const revenue = products
+  // Compute real metrics from live product data with dynamic backend fallbacks
+  const computedRevenue = revenue !== undefined ? revenue : products
     .filter(p => p.status === 'sold_out' || p.status === 'completed')
     .reduce((sum, p) => sum + p.currentPrice, 0)
 
-  const totalSold = products.reduce(
+  const computedTotalSold = totalSold !== undefined ? totalSold : products.reduce(
     (sum, p) => sum + (p.totalPortions - p.availablePortions),
     0
   )
@@ -76,7 +80,7 @@ export default function DashboardView({
             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Pendapatan</span>
           </div>
           <p className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
-            {formatCurrency(revenue)}
+            {formatCurrency(computedRevenue)}
           </p>
           <p className="text-[10px] text-slate-400 font-medium mt-1.5">Dari surplus terjual</p>
         </Card>
@@ -90,7 +94,7 @@ export default function DashboardView({
             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Terjual</span>
           </div>
           <p className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
-            {totalSold} <span className="text-base font-extrabold text-slate-500">porsi</span>
+            {computedTotalSold} <span className="text-base font-extrabold text-slate-500">porsi</span>
           </p>
           <p className="text-[10px] text-slate-400 font-medium mt-1.5">Porsi surplus terselamatkan</p>
         </Card>

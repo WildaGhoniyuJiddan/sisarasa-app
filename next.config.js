@@ -2,8 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'sisarasa-backend-231375803214.asia-southeast2.run.app',
+      },
       {
         protocol: 'https',
         hostname: '**',

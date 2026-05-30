@@ -7,7 +7,7 @@ import { Sparkles, LogOut, RefreshCw } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
-import { getProducts, Product } from '@/services/api'
+import { getProducts, Product, getSellerStats } from '@/services/api'
 import { Product as FrontendProduct, DonationStatus, ProductStatus } from '@/types'
 
 // Import modular sub-views
@@ -18,9 +18,10 @@ import BottomNavigation from '@/components/shared/BottomNavigation'
 
 export default function SellerDashboardPage() {
   const router = useRouter()
-  const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const { user, isAuthenticated, isLoading, logout, token } = useAuth()
   const [activeTab, setActiveTab] = useState<string>('dashboard')
   const [products, setProducts] = useState<FrontendProduct[]>([])
+  const [stats, setStats] = useState<{ revenue: number; totalSold: number }>({ revenue: 0, totalSold: 0 })
   const [isFetching, setIsFetching] = useState<boolean>(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
 
@@ -45,6 +46,19 @@ export default function SellerDashboardPage() {
         
         // Fetch active products from backend
         const apiProducts = await getProducts()
+
+        // Fetch stats if token is available
+        if (token) {
+          try {
+            const statsData = await getSellerStats(token)
+            setStats({
+              revenue: statsData.revenue,
+              totalSold: statsData.total_sold,
+            })
+          } catch (statsErr) {
+            console.error('Error fetching seller stats:', statsErr)
+          }
+        }
 
         // Map backend API data to frontend types using REAL data
         const mapped: FrontendProduct[] = apiProducts.map((p: Product) => ({
@@ -76,7 +90,7 @@ export default function SellerDashboardPage() {
     }
 
     fetchRealData()
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, token])
 
   if (isLoading || (isFetching && products.length === 0)) {
     return (
@@ -106,6 +120,8 @@ export default function SellerDashboardPage() {
             user={user}
             router={router}
             products={products}
+            revenue={stats.revenue}
+            totalSold={stats.totalSold}
           />
         )
       case 'products':

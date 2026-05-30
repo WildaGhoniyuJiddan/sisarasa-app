@@ -15,7 +15,8 @@ import {
   Tag,
   Package,
   TrendingDown,
-  Send
+  Send,
+  Image as LucideImage
 } from 'lucide-react'
 import { analyzeFood, SmartEntryResult, createProduct } from '@/services/api'
 import { useAuth } from '@/lib/auth-context'
@@ -36,6 +37,7 @@ export default function FoodAnalysisForm() {
   const [normalPrice, setNormalPrice] = useState<string>('')
   const [portions, setPortions] = useState<string>('')
   const [isDragActive, setIsDragActive] = useState(false)
+  const [showUploadModal, setShowUploadModal] = useState(false)
 
   // --- Analysis step ---
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -48,6 +50,7 @@ export default function FoodAnalysisForm() {
   // --- Shared ---
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // Clean up preview URL
   useEffect(() => {
@@ -224,7 +227,7 @@ export default function FoodAnalysisForm() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  onClick={!previewUrl ? triggerFileInput : undefined}
+                  onClick={!previewUrl ? () => setShowUploadModal(true) : undefined}
                   className={`relative flex flex-col items-center justify-center min-h-[220px] p-4 rounded-2xl border-2 border-dashed transition-all duration-300 ${
                     previewUrl 
                       ? 'border-slate-200 dark:border-slate-800 bg-slate-50/50' 
@@ -234,13 +237,14 @@ export default function FoodAnalysisForm() {
                   }`}
                 >
                   <input ref={fileInputRef} type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
+                  <input ref={cameraInputRef} type="file" onChange={handleFileChange} accept="image/*" capture="environment" className="hidden" />
 
                   {previewUrl ? (
                     <div className="relative w-full aspect-video rounded-xl overflow-hidden group shadow-md">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={previewUrl} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                        <button type="button" onClick={triggerFileInput} className="p-3 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-lg active:scale-95" title="Ganti"><Camera className="w-5 h-5" /></button>
+                        <button type="button" onClick={() => setShowUploadModal(true)} className="p-3 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-lg active:scale-95" title="Ganti"><Camera className="w-5 h-5" /></button>
                         <button type="button" onClick={resetForm} className="p-3 bg-rose-500/90 hover:bg-rose-500 text-white rounded-full shadow-lg active:scale-95" title="Hapus"><XCircle className="w-5 h-5" /></button>
                       </div>
                     </div>
@@ -251,13 +255,74 @@ export default function FoodAnalysisForm() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Drag & drop foto, atau <span className="text-emerald-500 hover:underline">pilih file</span>
+                          Drag & drop foto, atau <span className="text-emerald-500 hover:underline">pilih file / kamera</span>
                         </p>
                         <p className="text-xs text-slate-400 mt-1">JPEG, PNG, WebP (Maks. 5MB)</p>
                       </div>
                     </div>
                   )}
                 </div>
+
+                {/* Premium Upload Mode Selection Modal */}
+                {showUploadModal && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                    <div 
+                      className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-2xl overflow-hidden p-6 space-y-6 transform scale-100 transition-all duration-300"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="text-center">
+                        <h3 className="text-lg font-black text-slate-800 dark:text-slate-200 tracking-tight">
+                          Pilih Sumber Foto Makanan
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-1">
+                          Ambil foto langsung atau pilih dari galeri perangkat Anda
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Option A: Gallery */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowUploadModal(false)
+                            fileInputRef.current?.click()
+                          }}
+                          className="flex flex-col items-center justify-center p-5 rounded-2xl border border-slate-100 hover:border-emerald-500 bg-slate-50/50 hover:bg-emerald-50/10 transition-all duration-200 group active:scale-95 text-center"
+                        >
+                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-full group-hover:scale-110 transition-transform duration-300">
+                            <LucideImage className="w-6 h-6" />
+                          </div>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-3">Galeri Foto</span>
+                          <span className="text-[10px] text-slate-400 mt-1">Pilih gambar tersimpan</span>
+                        </button>
+
+                        {/* Option B: Camera */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowUploadModal(false)
+                            cameraInputRef.current?.click()
+                          }}
+                          className="flex flex-col items-center justify-center p-5 rounded-2xl border border-slate-100 hover:border-emerald-500 bg-slate-50/50 hover:bg-emerald-50/10 transition-all duration-200 group active:scale-95 text-center"
+                        >
+                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-full group-hover:scale-110 transition-transform duration-300">
+                            <Camera className="w-6 h-6" />
+                          </div>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-3">Ambil Foto</span>
+                          <span className="text-[10px] text-slate-400 mt-1">Gunakan kamera HP</span>
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowUploadModal(false)}
+                        className="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right: Price & Portions Input */}
